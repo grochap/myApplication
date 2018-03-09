@@ -10,10 +10,9 @@ var port = process.env.PORT || 8080;
 var router = express.Router();  
 
 // var Board = require('./app/models/board');
-var List = require('./app/models/board');
-
-
-
+var List = require('./app/models/model');
+var Card = require('./app/models/model');
+// var Board = require('./app/models/model');
 
 var mongoose   = require('mongoose');
 mongoose.connect('mongodb://grochap:123Ch123@ds261138.mlab.com:61138/rest-database');
@@ -22,14 +21,9 @@ var Schema       = mongoose.Schema;
 
 var boardSchema   = new Schema({
     name: String
-    }, 
-    {collection: 'boards'}
-);
+});
 
 var Board = mongoose.model('Board', boardSchema);
-
-
-
 
 router.use(function(req, res, next) {
     console.log('Something is happening.');
@@ -126,6 +120,112 @@ router.route('/boards/:board_id')
             res.json({ message: 'Successfully deleted' });
         });
     });
+
+router.route('/lists/:list_id')
+
+    .post(function(req, res) {
+
+        var card = new Card();      
+        card.name = req.body.name; 
+        card.description = req.body.description; 
+        card.idList = req.params.list_id;
+
+
+        card.save(function(err) {
+            if (err)
+                res.send(err);
+
+            res.json({ message: 'Card created!' });
+        });
+
+    })
+
+    .get(function(req, res) {
+        Card.find({idList: req.params.list_id}, function(err, cards) {
+            if (err)    
+                res.send(err);
+
+            res.json(cards);
+        });
+
+    })
+
+    .put(function(req, res) {
+
+        List.findById(req.params.list_id, function(err, list) {
+
+            if (err)
+                res.send(err);
+
+            list.name = req.body.name; 
+
+            list.save(function(err) {
+                if (err)
+                    res.send(err);
+
+                res.json({ message: 'List updated!' });
+            });
+
+        });
+    })
+
+    .delete(function(req, res) {
+
+        Card.find({idList: req.params.list_id}, function(err, cards) {
+            for(i in cards) {
+                selectedCardId = cards[i]._id;
+                Card.remove({
+                    _id: selectedCardId
+                }, function(err, card) {
+                    if (err)
+                        res.send(err);
+                });
+            };
+        });
+
+        List.remove({
+            _id: req.params.list_id
+        }, function(err, list) {
+            if (err)
+                res.send(err);
+
+            res.json({ message: 'Successfully deleted' });
+        });
+    });
+
+router.route('/cards/:card_id')
+
+    .put(function(req, res) {
+
+        Card.findById(req.params.card_id, function(err, list) {
+
+            if (err)
+                res.send(err);
+
+            card.name = req.body.name; 
+
+            card.save(function(err) {
+                if (err)
+                    res.send(err);
+
+                res.json({ message: 'Card updated!' });
+            });
+
+        });
+    })
+
+    .delete(function(req, res) {
+        Card.remove({
+            _id: req.params.card_id
+        }, function(err, card) {
+            if (err)
+                res.send(err);
+
+            res.json({ message: 'Successfully deleted' });
+        });
+    });
+
+    
 
 app.use('/api', router);
 
