@@ -9,14 +9,13 @@ var port = process.env.PORT || 8080;
 
 var router = express.Router();  
 
-// var Board = require('./app/models/board');
-var List = require('./app/models/model');
-var Card = require('./app/models/model');
+// var List = require('./app/models/model');
+// var Card = require('./app/models/model');
 // var Board = require('./app/models/model');
 
 var mongoose   = require('mongoose');
 mongoose.connect('mongodb://grochap:123Ch123@ds261138.mlab.com:61138/rest-database');
-// var mongoose     = require('mongoose');
+
 var Schema       = mongoose.Schema;
 
 var boardSchema   = new Schema({
@@ -25,19 +24,32 @@ var boardSchema   = new Schema({
 
 var Board = mongoose.model('Board', boardSchema);
 
+var listSchema   = new Schema({
+    name: String,
+    idBoard: String
+});
+
+var List = mongoose.model('List', listSchema);
+
+var cardSchema = new Schema({
+    name: String,
+    description: String,
+    creationDate: { type: Date, default: Date.now },
+    idBoard: String,
+    idList: String,
+});
+
+var Card = mongoose.model('Card', cardSchema);
+
 router.use(function(req, res, next) {
     console.log('Something is happening.');
     next();
 });
 
-router.get('/', function(req, res) {
-    res.json({ message: 'hooray! welcome to our api!' });   
-});
-
 app.use('/api', router);
 
 router.get('/', function(req, res) {
-    res.json({ message: 'hooray! welcome to our api!' });   
+    res.json({ message: 'Welcome' });   
 });
 
 router.route('/boards')
@@ -111,6 +123,31 @@ router.route('/boards/:board_id')
     })
 
     .delete(function(req, res) {
+
+        List.find({idBoard: req.params.board_id}, function(err, lists) {
+            for(j in lists) {
+                selectedListId = lists[j]._id;
+                Card.find({idList: selectedListId}, function(err, cards) {
+                    for(i in cards) {
+                        selectedCardId = cards[i]._id;
+                        Card.remove({
+                            _id: selectedCardId
+                        }, function(err, card) {
+                            if (err)
+                                res.send(err);
+                        });
+                    };
+                });
+
+                List.remove({
+                    _id: selectedListId
+                }, function(err, list) {
+                    if (err)
+                        res.send(err);
+                });
+            };
+        });
+        
         Board.remove({
             _id: req.params.board_id
         }, function(err, board) {
