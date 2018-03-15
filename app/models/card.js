@@ -7,6 +7,7 @@ var cardSchema = new Schema({
     creationDate: { type: Date, default: Date.now },
     idBoard: String,
     idList: String,
+    labels: [String]
 });
 
 var Card = mongoose.model('Card', cardSchema);
