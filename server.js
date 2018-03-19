@@ -15,15 +15,6 @@ var mongoose   = require('mongoose');
 mongoose.connect('mongodb://grochap:123Ch123@ds261138.mlab.com:61138/rest-database');
 var db = mongoose.connection;
 
-app.use(session({
-    secret: 'work hard',
-    resave: true,
-    saveUninitialized: false,
-    store: new MongoStore({
-      mongooseConnection: db
-    })
-}));
-
 router.use(function(req, res, next) {
     console.log('Something is happening.');
     next();

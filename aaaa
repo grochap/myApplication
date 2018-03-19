@@ -1,0 +1,14 @@
+Boards
+
+GET 
+/boards
+
+/boards/:board_id
+
+/boards/:board_id/lists
+
+/boards/:board_id/lists/:list_id
+
+/boards/:board_id/lists/:list_id/cards
+
+/boards/:board_id/lists/:list_id/cards/:cards_id
